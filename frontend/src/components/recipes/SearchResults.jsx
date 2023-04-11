@@ -1,29 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useContext } from 'react'
+import Spinner from '../layout/Spinner'
+import RecipeItem from './RecipeItem'
+import SpoonacularContext from '../../context/spoonacular/SpoonacularContext'
 
 function SearchResults() {
-  const [recipes, setRecipes] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { recipes, loading } = useContext(SpoonacularContext)
 
-  useEffect(() => {
-    handleSubmit()
-  }, [])
-
-  const handleSubmit = async () => {
-    const response = await fetch(
-      `https://api.spoonacular.com/recipes/findByIngredients?apiKey=${process.env.REACT_APP_API_KEY}&ingredients=apples,+flour,+sugar&number=3`
+  if (!loading) {
+    return (
+      <div className='grid grid-cols-1 gap-8 xl:grid-cols-4 lg:grid:cols-3 md:grid-cols-2'>
+        {recipes.map((recipe) => (
+          <RecipeItem key={recipe.id} recipe={recipe} />
+        ))}
+      </div>
     )
-    const data = await response.json()
-    console.log(data)
-    setRecipes(data)
+  } else {
+    return <Spinner />
   }
-
-  return (
-    <div className='grid grid-cols-1 gap-8 xl:grid-cols-4 lg:grid:cols-3 md:grid-cols-2'>
-      {recipes.map((recipe) => (
-        <h3>{recipe.title}</h3>
-      ))}
-    </div>
-  )
 }
 
 export default SearchResults
