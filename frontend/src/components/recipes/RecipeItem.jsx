@@ -8,15 +8,15 @@ function RecipeItem({ recipe }) {
         <div>
           <div className='avatar'>
             <div className='rounded-full shadow w-14 h-14'>
-              <img src={recipe.image} alt='Profile' />
+              <img src={recipe.photo} alt='Profile' />
             </div>
           </div>
         </div>
         <div>
-          <h2 className='card-title'>{recipe.title}</h2>
+          <h2 className='card-title'>{recipe.name}</h2>
           <Link
             className='text-base-content text-opacity-40'
-            to={`/recipe/${recipe.title}`}
+            to={`/recipe/${recipe.name}`}
           >
             You have {recipe.usedIngredientCount} ingredients
           </Link>

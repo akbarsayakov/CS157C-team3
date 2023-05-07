@@ -1,10 +1,13 @@
 import { useState, useContext } from 'react'
 import SpoonacularContext from '../../context/spoonacular/SpoonacularContext'
+import AlertContext from '../../context/alert/AlertContext'
 
 function RecipeSearch() {
   const [text, setText] = useState('')
 
-  const { recipes, searchRecipes } = useContext(SpoonacularContext)
+  const { recipes, searchRecipes, clearRecipes } =
+    useContext(SpoonacularContext)
+  const { setAlert } = useContext(AlertContext)
 
   const handleChange = (e) => setText(e.target.value)
 
@@ -12,7 +15,7 @@ function RecipeSearch() {
     e.preventDefault()
 
     if (text === '') {
-      alert('Please enter something')
+      setAlert('Please enter something', 'error')
     } else {
       searchRecipes(text)
       setText('')
@@ -44,10 +47,7 @@ function RecipeSearch() {
       </div>
       {recipes.length > 0 && (
         <div>
-          <button
-            ///onClick={() => dispatch({ type: 'CLEAR_USERS' })}
-            className='btn btn-ghost btn-lg'
-          >
+          <button onClick={clearRecipes} className='btn btn-ghost btn-lg'>
             Clear
           </button>
         </div>

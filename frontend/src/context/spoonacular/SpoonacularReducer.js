@@ -11,6 +11,11 @@ const spoonacularReducer = (state, action) => {
         ...state,
         loading: true,
       }
+    case 'CLEAR_RECIPES':
+      return {
+        ...state,
+        recipes: [],
+      }
     default:
       return state
   }
