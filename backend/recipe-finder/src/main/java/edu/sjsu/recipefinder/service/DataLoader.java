@@ -23,7 +23,7 @@ public class DataLoader {
 
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Authorization", "Bearer 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");
+        con.setRequestProperty("Authorization", "Bearer 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");
 
         JSONObject data = new JSONObject();
         data.put("model", "text-davinci-003");
@@ -48,30 +48,34 @@ public class DataLoader {
     public void loadData(Jedis jedis) {
             try {
 
-                FileReader filereader = new FileReader("/Users/anushree/Projects/CS157C-team3/dataset/clean-recipe-dataset.csv");
-                CSVReader csvReader = new CSVReader(filereader);
+                FileReader filereader = new FileReader("/Users/anushree/Projects/CS157C-team3/dataset/recipe-dataset-small.csv");
+                CSVReader csvReader = new CSVReader(filereader,';');
                 String[] nextRecipe;
                 int count = 1;
 
                 nextRecipe = csvReader.readNext(); //skipping first line
 
-                while ((nextRecipe = csvReader.readNext()) != null && count <= 100) {
+                while ((nextRecipe = csvReader.readNext()) != null && count <= 10) {
+                   System.out.println(nextRecipe.toString());
+                   int recipeNo = jedis.incr("recipe_count").intValue();
+                   String recipeName = nextRecipe[0].trim();
+                   String recipeSteps = nextRecipe[1].trim();
+                   String recipePhoto = nextRecipe[2].trim();
+                   String recipeEstimatedTime = nextRecipe[4].trim();
+                   String recipeFoodType = nextRecipe[5].trim();
 
-                   int recipeNo = jedis.incr("recipe-count").intValue();
-                   String recipeName = nextRecipe[0];
-                   String recipeProcedure = nextRecipe[1];
-                   String recipePhoto = nextRecipe[2];
-
-                   jedis.set("recipe-name#"+recipeNo, recipeName);
-                   jedis.set("recipe-procedure#"+recipeNo, recipeName);
-                   jedis.set("recipe-photo#"+recipeNo, recipePhoto);
+                   jedis.set("recipe_name_"+recipeNo, recipeName);
+                   jedis.set("recipe_steps_"+recipeNo, recipeSteps);
+                   jedis.set("recipe_photo_"+recipeNo, recipePhoto);
+                   jedis.set("recipe_estimatedtime_"+recipeNo, recipeEstimatedTime);
+                   jedis.set("recipe_foodtype_"+recipeNo, recipeFoodType);
 
                    String[] ingredients = getExtractedIngredients(nextRecipe[3].toLowerCase().trim());
                    System.out.println("Recipe #" +count);
 
                   for(String ingredient : ingredients){
                       if(!ingredient.isBlank())
-                          jedis.sadd("recipe-ingredients#"+recipeNo, ingredient.replaceAll("-"," ").toLowerCase().trim());
+                          jedis.sadd("recipe_ingredients_"+recipeNo, ingredient.replaceAll("-"," ").toLowerCase().trim());
                    }
 
                    count++;
