@@ -1,5 +1,7 @@
 package edu.sjsu.recipefinder.model;
 
+import java.util.Set;
+
 public class PostRecipe {
 
     public String email;
@@ -13,7 +15,9 @@ public class PostRecipe {
 
     public String foodType;
 
-    public PostRecipe(String email, String name, String ingredients, String steps, String photo, String estimatedTime, String foodType) {
+    public String recipeNo;
+
+    public PostRecipe(String email, String name, String steps, String ingredients, String photo, String estimatedTime, String foodType, String recipeNo) {
         this.email = email;
         this.name = name;
         this.steps = steps;
@@ -21,6 +25,7 @@ public class PostRecipe {
         this.photo = photo;
         this.estimatedTime = estimatedTime;
         this.foodType = foodType;
+        this.recipeNo = recipeNo;
     }
 
     public String getEmail() {
@@ -77,5 +82,13 @@ public class PostRecipe {
 
     public void setFoodType(String foodType) {
         this.foodType = foodType;
+    }
+
+    public String getRecipeNo() {
+        return recipeNo;
+    }
+
+    public void setRecipeNo(String recipeNo) {
+        this.recipeNo = recipeNo;
     }
 }
