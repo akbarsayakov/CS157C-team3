@@ -39,24 +39,24 @@ export const SpoonacularProvider = ({ children }) => {
     // console.log(data, 'DATA')
   }
 
-  const getRecipe = async (name) => {
-    setLoading()
+  // const getRecipe = async (name) => {
+  //   setLoading()
 
-    try {
-      const response = await api.get(
-        '/recipes?email=rahul.pillai03@gmail.com&name=&ingredients=&estimated_time=0&food_type='
-      )
-      dispatch({
-        type: 'GET_RECIPES',
-        payload: response.data,
-      })
-    } catch (err) {
-      console.log('Error', err.response)
-    }
+  //   try {
+  //     const response = await api.get(
+  //       '/recipes?email=rahul.pillai03@gmail.com&name=&ingredients=&estimated_time=0&food_type='
+  //     )
+  //     dispatch({
+  //       type: 'GET_RECIPES',
+  //       payload: response.data,
+  //     })
+  //   } catch (err) {
+  //     console.log('Error', err.response)
+  //   }
 
-    // const data = await response.json()
-    // console.log(data, 'DATA')
-  }
+  //   // const data = await response.json()
+  //   // console.log(data, 'DATA')
+  // }
 
   // Clear recipies from state
   const clearRecipes = () => dispatch({ type: 'CLEAR_RECIPES' })

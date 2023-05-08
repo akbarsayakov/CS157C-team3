@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
+import Recipe from '../../pages/Recipe'
 
 function RecipeItem({ recipe }) {
   return (
