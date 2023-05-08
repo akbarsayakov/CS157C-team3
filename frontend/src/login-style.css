@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@500&display=swap');
+
+* { 
+    box-sizing:border-box;
+}
+
+body {
+    padding:0;
+    margin: 0;
+    font-family: "Rubik";
+    padding: 40px
+}
+
+.container {
+    display:grid;
+    grid-template-columns: 50% 50%;
+    border-radius: 10px;
+    overflow : hidden;  
+}
+
+.left-side {
+    display:flex;
+    justify-content: center;
+}
+img {
+    width: 80%;
+}
+
+.right-side {
+    display:flex;
+    flex-direction: column;
+    justify-content: content;
+    padding-right: 100px;
+    background-color: white; 
+}
+
+h1{
+    font-size: 50px;
+}
+
+p {
+    font-size: 20px;
+    opacity: .7;
+}
+
+.login-form {
+    width: 500px; 
+}
+
+.login-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding-bottom:50px;
+}
+
+label.item {
+    display: inline-block;
+    background-color: white;
+    margin-bottom: 10px;
+    position: absolute;
+    padding: 0 10px; 
+    font-size: 14px;
+}
+
+input {
+    border: 1px solid black;
+    height: 55px;
+    padding: 0 2rem;
+    width: 100%;
+    outline: none;
+    transition: background .5s;
+    font-size: 18px;
+    border-radius: 100px;
+}
+
+button {
+    border: none;
+    padding : 1rem;
+    border-radius: 100px;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 18px;
+    height: 55px;
+    cursor: pointer;  
+}
+
+button:hover{
+    background-color: green;
+    color:white;
+}
+
+.create-account{
+    margin:auto;
+    padding-left:150px; 
+}
