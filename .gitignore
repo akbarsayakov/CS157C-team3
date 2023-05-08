@@ -2,3 +2,4 @@ dev/
 .idea
 dataset/.DS_Store
 .DS_Store
+mock-server/node_modules

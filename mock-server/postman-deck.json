@@ -1,0 +1,206 @@
+{
+	"info": {
+		"_postman_id": "3fd27c99-fe5e-4226-be47-dbc05051386b",
+		"name": "Anushree's CS157C Project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15221195"
+	},
+	"item": [
+		{
+			"name": "Registration",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"12345\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/registration",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"registration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"john.doe@example.com\",\n    // \"password\": \"12345\"\n    \"password\": \"abc12345@\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/login",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Recipe",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"john.doe@example.com\",\n    \"name\": \"John Doe\",\n    \"ingredients\": \"Rice, onions, tomatoes\",\n    \"steps\": \"Add rice, sorte onions, add tomatoes\",\n    \"photo\": \"base64\",\n    \"estimated_time\": 1,\n    \"food_type\": \"Main Course\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/recipe",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"recipe"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Recipes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/recipes?email=rahul.pillai03@gmail.com&name=&ingredients=&estimated_time=0&food_type=",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"recipes"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "rahul.pillai03@gmail.com"
+						},
+						{
+							"key": "name",
+							"value": ""
+						},
+						{
+							"key": "ingredients",
+							"value": ""
+						},
+						{
+							"key": "estimated_time",
+							"value": "0"
+						},
+						{
+							"key": "food_type",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit Recipe",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"john.doe@example.com\",\n    \"name\": \"Pulav\",\n    \"ingredients\": \"Rice, onions, tomatoes, salt, turmeric powder\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/recipe",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"recipe"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Recipe",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"john.doe@example.com\",\n    \"name\": \"Pulav\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/recipe",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"recipe"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "URL",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
