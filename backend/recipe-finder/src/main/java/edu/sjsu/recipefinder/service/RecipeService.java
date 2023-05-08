@@ -6,10 +6,7 @@ import edu.sjsu.recipefinder.model.PostRecipe;
 import edu.sjsu.recipefinder.model.SearchRecipe;
 import redis.clients.jedis.Jedis;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class RecipeService {
     public RecipeService() {
@@ -75,6 +72,7 @@ public class RecipeService {
 
         if(recipe.getIngredients() != null && !recipe.getIngredients().trim().isEmpty()){
             jedis.set("recipe_ingredients_quantity_"+recipeNumberToBeUpdated, recipe.getIngredients().trim());
+
             String[] ingredients = loader.getExtractedIngredients(recipe.getIngredients().toLowerCase().trim());
 
             for(String ingredient : ingredients) {
@@ -123,7 +121,7 @@ public class RecipeService {
                 String photo = jedis.get("recipe_photo_"+i);
                 String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                 String foodType = jedis.get("recipe_foodtype_"+i);
-                PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name,ingredients,steps,photo,estimatedTime,foodType);
+                PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name,ingredients,steps,photo,estimatedTime,foodType,i);
                 listOfRecipes.add(resultRecipe);
             }
             return listOfRecipes;
@@ -145,7 +143,7 @@ public class RecipeService {
                         String photo = jedis.get("recipe_photo_"+i);
                         String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                         String foodType = jedis.get("recipe_foodtype_"+i);
-                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name1,ingredients,steps,photo,estimatedTime,foodType);
+                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
                         listOfRecipes.add(resultRecipe);
                     }
                 }
@@ -159,7 +157,7 @@ public class RecipeService {
                         String photo = jedis.get("recipe_photo_"+i);
                         String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                         String foodType = jedis.get("recipe_foodtype_"+i);
-                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name1,ingredients,steps,photo,estimatedTime,foodType);
+                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
                         listOfRecipes.add(resultRecipe);
                     }
                 }
@@ -187,7 +185,7 @@ public class RecipeService {
                         String photo = jedis.get("recipe_photo_"+i);
                         String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                         String foodType = jedis.get("recipe_foodtype_"+i);
-                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name1,ingredients,steps,photo,estimatedTime,foodType);
+                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
                         listOfRecipes.add(resultRecipe);
                     }
                 }
@@ -216,7 +214,7 @@ public class RecipeService {
                         String photo = jedis.get("recipe_photo_"+i);
                         String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                         String foodType = jedis.get("recipe_foodtype_"+i);
-                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name1,ingredients,steps,photo,estimatedTime,foodType);
+                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
                         listOfRecipes.add(resultRecipe);
                     }
                 }
@@ -224,11 +222,56 @@ public class RecipeService {
         }
 
         if(recipe.getIngredients() != null && !recipe.getIngredients().trim().isEmpty()){
-            
+            String[] ingredientsList = recipe.getIngredients().trim().split(" ");
+
+            int leftLimit = 48; // numeral '0'
+            int rightLimit = 122; // letter 'z'
+            int targetStringLength = 10;
+            Random random = new Random();
+
+            String generatedString = random.ints(leftLimit, rightLimit + 1)
+                    .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                    .limit(targetStringLength)
+                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                    .toString();
+
+            for(String ingredient : ingredientsList){
+                if(!ingredient.isBlank())
+                    jedis.sadd(generatedString, ingredient.replaceAll("-"," ").toLowerCase().trim());
+            }
+
+            if(listOfRecipes.size() > 0){
+                List<PostRecipe> removeList = new ArrayList<>();
+                for(PostRecipe shortlistedRecipe : listOfRecipes){
+                    String recipeNo = shortlistedRecipe.getRecipeNo();
+                    Set<String> commonIngredients = jedis.sinter("recipe_ingredients_"+recipeNo,generatedString);
+                    int countOfAvailableIngredients = ingredientsList.length;
+                    int countOfMatchingIngredients = commonIngredients.size();
+                    float percentOfMatchingIngredients = ((float) countOfMatchingIngredients / countOfAvailableIngredients ) * 100;
+                    if(percentOfMatchingIngredients < (float) 50){
+                        removeList.add(shortlistedRecipe);
+                    }
+                }
+                listOfRecipes.removeAll(removeList);
+            } else{
+                for(int i = 1; i <= count; i++){
+                    Set<String> commonIngredients = jedis.sinter("recipe_ingredients_"+i,generatedString);
+                    int countOfAvailableIngredients = ingredientsList.length;
+                    int countOfMatchingIngredients = commonIngredients.size();
+                    float percentOfMatchingIngredients = ((float) countOfMatchingIngredients / countOfAvailableIngredients ) * 100;
+                    if(percentOfMatchingIngredients >= (float) 50){
+                        String name1 = jedis.get("recipe_name_"+i);
+                        String steps = jedis.get("recipe_steps_"+i);
+                        String ingredients = jedis.get("recipe_ingredients_quantity_"+i);
+                        String photo = jedis.get("recipe_photo_"+i);
+                        String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
+                        String foodType = jedis.get("recipe_foodtype_"+i);
+                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
+                        listOfRecipes.add(resultRecipe);
+                    }
+                }
+            }
         }
-
-
-
         return listOfRecipes;
     }
 }
