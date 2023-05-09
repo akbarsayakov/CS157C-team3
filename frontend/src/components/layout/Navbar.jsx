@@ -24,6 +24,9 @@ function Navbar({ title }) {
             <Link to='/login' className='btn btn-ghost btn-sm rounded-btn'>
               Login
             </Link>
+            <Link to='/add' className='btn btn-ghost btn-sm rounded-btn'>
+              Add Recipe
+            </Link>
           </div>
         </div>
       </div>
