@@ -1,36 +1,55 @@
 package edu.sjsu.recipefinder.controller;
 
+import edu.sjsu.recipefinder.model.DeleteRecipe;
 import edu.sjsu.recipefinder.model.Message;
-import edu.sjsu.recipefinder.model.Recipe;
+import edu.sjsu.recipefinder.model.PostRecipe;
+import edu.sjsu.recipefinder.model.SearchRecipe;
+import edu.sjsu.recipefinder.service.RecipeService;
 import edu.sjsu.recipefinder.util.Constants;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import redis.clients.jedis.Jedis;
 
-@RestController("/recipe")
+import java.util.List;
+
+@RestController
+@RequestMapping("/157C-team3/recipe")
 public class RecipeController {
 
+    private final RecipeService recipeService;
+    public Jedis jedis;
+
+    public RecipeController() {
+        this.recipeService = new RecipeService();
+        this.jedis = new Jedis();
+    }
+
+    //search recipes
     @GetMapping("/search")
-    public ResponseEntity<Recipe[]> recipe(@RequestParam Recipe recipe) {
-        // TODO query saved recipes in redis and load matches into memory
-        return null;
+    public ResponseEntity<List<PostRecipe>> search(@RequestBody SearchRecipe recipe) {
+        List<PostRecipe> matchingRecipes = recipeService.searchRecipe(jedis, recipe);
+        return new ResponseEntity<>(matchingRecipes, HttpStatus.OK);
     }
 
-
+    //upload recipe
     @PostMapping("/create")
-    public ResponseEntity<Message> create(@RequestParam Recipe recipe) {
-        // TODO save this recipe in redis if not already present; handle errors
-        return ResponseEntity.ok(new Message(Constants.TEXT_WIP));
+    public ResponseEntity<Message> create(@RequestBody PostRecipe recipe) throws Exception{
+        Message msg = recipeService.createRecipe(jedis, recipe);
+        return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 
+    //update recipe
     @PutMapping("/edit")
-    public ResponseEntity<Message> edit(@RequestParam Recipe recipe) {
-        // TODO edit this recipe in redis if not absent; handle errors
-        return ResponseEntity.ok(new Message(Constants.TEXT_WIP));
+    public ResponseEntity<Message> edit(@RequestBody PostRecipe recipe) throws Exception{
+        Message msg = recipeService.updateRecipe(jedis, recipe);
+        return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 
-    @PostMapping("/favorite")
-    public ResponseEntity<Message> favorite(@RequestParam Recipe recipe) {
-        // TODO mark this recipe as a favorite in redis if not absent; handle errors
-        return ResponseEntity.ok(new Message(Constants.TEXT_WIP));
+    //delete recipe
+    @DeleteMapping("/delete")
+    public ResponseEntity<Message> delete(@RequestBody DeleteRecipe recipe) throws Exception{
+        Message msg = recipeService.deleteRecipe(jedis, recipe);
+        return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 }
