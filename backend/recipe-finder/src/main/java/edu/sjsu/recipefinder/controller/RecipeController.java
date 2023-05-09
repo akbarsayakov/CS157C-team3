@@ -1,12 +1,8 @@
 package edu.sjsu.recipefinder.controller;
 
-import edu.sjsu.recipefinder.model.DeleteRecipe;
-import edu.sjsu.recipefinder.model.Message;
-import edu.sjsu.recipefinder.model.PostRecipe;
-import edu.sjsu.recipefinder.model.SearchRecipe;
+import edu.sjsu.recipefinder.model.*;
 import edu.sjsu.recipefinder.service.DataLoader;
 import edu.sjsu.recipefinder.service.RecipeService;
-import edu.sjsu.recipefinder.util.Constants;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,15 +25,21 @@ public class RecipeController {
     }
 
     //load csv
-    @PostMapping("/csv")
-    public ResponseEntity<Message> loadCsv(){
+    @PostMapping("/csv-recipe")
+    public ResponseEntity<Message> loadCsvRecipe(){
         Message msg = dataLoader.loadData(jedis);
+        return new ResponseEntity<>(msg, HttpStatus.OK);
+    }
+
+    @PostMapping("/csv-users")
+    public ResponseEntity<Message> loadCsvUsers(){
+        Message msg = dataLoader.loadUsers(jedis);
         return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 
     //search recipes
     @GetMapping("/search")
-    public ResponseEntity<List<PostRecipe>> search(@RequestBody SearchRecipe recipe) {
+    public ResponseEntity<List<PostRecipe>> search(SearchRecipe recipe) {
         List<PostRecipe> matchingRecipes = recipeService.searchRecipe(jedis, recipe);
         return new ResponseEntity<>(matchingRecipes, HttpStatus.OK);
     }
