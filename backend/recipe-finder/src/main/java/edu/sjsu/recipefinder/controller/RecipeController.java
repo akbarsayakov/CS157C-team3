@@ -4,6 +4,7 @@ import edu.sjsu.recipefinder.model.DeleteRecipe;
 import edu.sjsu.recipefinder.model.Message;
 import edu.sjsu.recipefinder.model.PostRecipe;
 import edu.sjsu.recipefinder.model.SearchRecipe;
+import edu.sjsu.recipefinder.service.DataLoader;
 import edu.sjsu.recipefinder.service.RecipeService;
 import edu.sjsu.recipefinder.util.Constants;
 import org.springframework.http.HttpStatus;
@@ -18,11 +19,20 @@ import java.util.List;
 public class RecipeController {
 
     private final RecipeService recipeService;
+    private final DataLoader dataLoader;
     public Jedis jedis;
 
     public RecipeController() {
         this.recipeService = new RecipeService();
+        this.dataLoader = new DataLoader();
         this.jedis = new Jedis();
+    }
+
+    //load csv
+    @PostMapping("/csv")
+    public ResponseEntity<Message> loadCsv(){
+        Message msg = dataLoader.loadData(jedis);
+        return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 
     //search recipes

@@ -2,6 +2,7 @@ package edu.sjsu.recipefinder.service;
 
 import com.lilittlecat.chatgpt.offical.ChatGPT;
 import com.opencsv.CSVReader;
+import edu.sjsu.recipefinder.model.Message;
 import kong.unirest.json.JSONObject;
 import redis.clients.jedis.Jedis;
 
@@ -23,7 +24,7 @@ public class DataLoader {
 
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Authorization", "Bearer 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");
+        con.setRequestProperty("Authorization", "Bearer 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");
 
         JSONObject data = new JSONObject();
         data.put("model", "text-davinci-003");
@@ -45,7 +46,8 @@ public class DataLoader {
             return answer.split("\\n");
     }
 
-    public void loadData(Jedis jedis) {
+    public Message loadData(Jedis jedis) {
+        Message msg = new Message();
             try {
 
                 FileReader filereader = new FileReader("/Users/anushree/Projects/CS157C-team3/dataset/recipe-dataset-small.csv");
@@ -77,12 +79,14 @@ public class DataLoader {
                       if(!ingredient.isBlank())
                           jedis.sadd("recipe_ingredients_"+recipeNo, ingredient.replaceAll("-"," ").toLowerCase().trim());
                    }
-
                    count++;
                 }
+                msg.setText("Data inserted in Redis");
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
+            return msg;
         }
+
 }
