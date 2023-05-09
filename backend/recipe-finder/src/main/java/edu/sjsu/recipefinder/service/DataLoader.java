@@ -24,14 +24,15 @@ public class DataLoader {
 
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Authorization", "Bearer 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");
+        con.setRequestProperty("Authorization", "Bearer ");
 
         JSONObject data = new JSONObject();
         data.put("model", "text-davinci-003");
-        text = "list only the food ingredients and not the quantities from this text: " + text;
+        text = "list down only the food ingredients and not the quantities from this text: " + text;
+        //text = "what is the time";
         data.put("prompt", text);
         data.put("max_tokens", 256);
-        data.put("temperature", 1.0);
+        data.put("temperature", 0.7);
 
         con.setDoOutput(true);
         con.getOutputStream().write(data.toString().getBytes());
@@ -65,12 +66,15 @@ public class DataLoader {
                    String recipePhoto = nextRecipe[2].trim();
                    String recipeEstimatedTime = nextRecipe[4].trim();
                    String recipeFoodType = nextRecipe[5].trim();
+                   String recipeIngredientsQuantity = nextRecipe[3].trim();
+
 
                    jedis.set("recipe_name_"+recipeNo, recipeName);
                    jedis.set("recipe_steps_"+recipeNo, recipeSteps);
                    jedis.set("recipe_photo_"+recipeNo, recipePhoto);
                    jedis.set("recipe_estimatedtime_"+recipeNo, recipeEstimatedTime);
                    jedis.set("recipe_foodtype_"+recipeNo, recipeFoodType);
+                   jedis.set("recipe_ingredients_quantity_"+recipeNo, recipeIngredientsQuantity);
 
                    String[] ingredients = getExtractedIngredients(nextRecipe[3].toLowerCase().trim());
                    System.out.println("Recipe #" +count);

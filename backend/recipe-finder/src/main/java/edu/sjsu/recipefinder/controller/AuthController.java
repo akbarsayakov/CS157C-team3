@@ -26,7 +26,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Message> register(@RequestBody RegisterUser user) {
         Message msg = loginAndRegistrationService.register(jedis, user);
-        if(msg.getText().trim().isBlank()){
+        if(msg.getText() == null){
             return new ResponseEntity<>(msg, HttpStatus.OK);
         }
         return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
@@ -37,7 +37,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Message> login(@RequestBody LoginUser user) {
         Message msg = loginAndRegistrationService.login(jedis, user);
-        if(msg.getText().trim().isBlank()){
+        if(msg.getText() == null){
             return new ResponseEntity<>(msg, HttpStatus.OK);
         }
         return new ResponseEntity<>(msg, HttpStatus.UNAUTHORIZED);
