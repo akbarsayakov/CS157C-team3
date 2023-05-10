@@ -11,7 +11,11 @@ import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DataLoader {
     public DataLoader() {
@@ -51,15 +55,15 @@ public class DataLoader {
         Message msg = new Message();
             try {
 
-                FileReader filereader = new FileReader("/Users/anushree/Projects/CS157C-team3/dataset/recipe-dataset-small.csv");
+                FileReader filereader = new FileReader("/Users/anushree/Projects/CS157C-team3/dataset/recipe-dataset-final.csv");
                 CSVReader csvReader = new CSVReader(filereader,';');
                 String[] nextRecipe;
                 int count = 1;
 
                 nextRecipe = csvReader.readNext(); //skipping first line
 
-                while ((nextRecipe = csvReader.readNext()) != null && count <= 10) {
-                   System.out.println(nextRecipe.toString());
+                while ((nextRecipe = csvReader.readNext()) != null && count <= 14) {
+
                    int recipeNo = jedis.incr("recipe_count").intValue();
                    String recipeName = nextRecipe[0].trim();
                    String recipeSteps = nextRecipe[1].trim();
@@ -77,7 +81,7 @@ public class DataLoader {
                    jedis.set("recipe_ingredients_quantity_"+recipeNo, recipeIngredientsQuantity);
 
                    String[] ingredients = getExtractedIngredients(nextRecipe[3].toLowerCase().trim());
-                   System.out.println("Recipe #" +count);
+
 
                   for(String ingredient : ingredients){
                       if(!ingredient.isBlank())
@@ -85,12 +89,63 @@ public class DataLoader {
                    }
                    count++;
                 }
-                msg.setText("Data inserted in Redis");
+                msg.setText("Recipe Data inserted in Redis");
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
             return msg;
         }
+
+    public Message loadUser(Jedis jedis) {
+        Message msg = new Message();
+        try {
+
+            FileReader filereader = new FileReader("/Users/anushree/Projects/CS157C-team3/dataset/users-dataset.csv");
+            CSVReader csvReader = new CSVReader(filereader,',');
+            String[] nextUser;
+            int count = 1;
+
+            nextUser = csvReader.readNext(); //skipping first line
+
+            while ((nextUser = csvReader.readNext()) != null) {
+
+                String email = nextUser[0].toLowerCase().trim();
+                String name = nextUser[1].trim();
+                String password = hashPassword(nextUser[2].trim());
+
+                Map<String,String> map = new HashMap<>();
+                map.put("email",email);
+                map.put("name",name);
+                map.put("password",password);
+
+                jedis.hmset("user_"+email,map);
+
+            }
+            msg.setText("User Data inserted in Redis");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return msg;
+    }
+
+
+    public String hashPassword(String input) throws NoSuchAlgorithmException {
+        // get an instance of the SHA-256 message digest algorithm
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+
+        // compute the hash of the input string
+        byte[] hash = md.digest(input.getBytes());
+
+        // convert the hash to a hexadecimal string
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : hash) {
+            hexString.append(String.format("%02x", b));
+        }
+
+        return hexString.toString();
+    }
+
 
 }
