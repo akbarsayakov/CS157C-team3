@@ -2,12 +2,16 @@ package edu.sjsu.recipefinder.controller;
 
 import edu.sjsu.recipefinder.model.*;
 import edu.sjsu.recipefinder.service.LoginAndRegistrationService;
+import edu.sjsu.recipefinder.util.Constants;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.Jedis;
 
+import java.security.NoSuchAlgorithmException;
+
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/157C-team3/auth")
 public class AuthController {
 
@@ -21,7 +25,7 @@ public class AuthController {
 
     //register
     @PostMapping("/register")
-    public ResponseEntity<Message> register(RegisterUser user) {
+    public ResponseEntity<Message> register(@RequestBody RegisterUser user) throws NoSuchAlgorithmException {
         Message msg = loginAndRegistrationService.register(jedis, user);
         if(msg.getText() == null){
             return new ResponseEntity<>(msg, HttpStatus.OK);
@@ -32,9 +36,9 @@ public class AuthController {
 
     //login
     @PostMapping("/login")
-    public ResponseEntity<Message> login(LoginUser user) {
+    public ResponseEntity<Message> login(@RequestBody LoginUser user) throws NoSuchAlgorithmException {
         Message msg = loginAndRegistrationService.login(jedis, user);
-        if(msg.getText() == null){
+        if(!msg.getText().equals(Constants.WRONG_PASSWORD) && !msg.getText().equals(Constants.NO_SUCH_USER)){
             return new ResponseEntity<>(msg, HttpStatus.OK);
         }
         return new ResponseEntity<>(msg, HttpStatus.UNAUTHORIZED);

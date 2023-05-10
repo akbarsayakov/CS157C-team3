@@ -11,6 +11,7 @@ import redis.clients.jedis.Jedis;
 import java.util.List;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/157C-team3/recipe")
 public class RecipeController {
 
@@ -33,13 +34,13 @@ public class RecipeController {
 
     @PostMapping("/csv-users")
     public ResponseEntity<Message> loadCsvUsers(){
-        Message msg = dataLoader.loadUsers(jedis);
+        Message msg = dataLoader.loadUser(jedis);
         return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 
     //search recipes
-    @GetMapping("/search")
-    public ResponseEntity<List<PostRecipe>> search(SearchRecipe recipe) {
+    @PostMapping("/search")
+    public ResponseEntity<List<PostRecipe>> search(@RequestBody SearchRecipe recipe) {
         List<PostRecipe> matchingRecipes = recipeService.searchRecipe(jedis, recipe);
         return new ResponseEntity<>(matchingRecipes, HttpStatus.OK);
     }
