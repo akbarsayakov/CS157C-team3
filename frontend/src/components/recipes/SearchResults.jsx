@@ -9,8 +9,8 @@ function SearchResults() {
   if (!loading) {
     return (
       <div className='grid grid-cols-1 gap-8 xl:grid-cols-4 lg:grid:cols-3 md:grid-cols-2'>
-        {recipes.map((recipe) => (
-          <RecipeItem key={recipe.id} recipe={recipe} />
+        {recipes.map((recipe, index) => (
+          <RecipeItem key={index} recipe={recipe} />
         ))}
       </div>
     )
