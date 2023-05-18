@@ -17,7 +17,7 @@ public class PostRecipe {
 
     public String recipeNo;
 
-    public PostRecipe(String email, String name, String steps, String ingredients, String photo, String estimatedTime, String foodType, String recipeNo) {
+    public PostRecipe(String email, String name, String ingredients, String steps, String photo, String estimatedTime, String foodType, String recipeNo) {
         this.email = email;
         this.name = name;
         this.steps = steps;

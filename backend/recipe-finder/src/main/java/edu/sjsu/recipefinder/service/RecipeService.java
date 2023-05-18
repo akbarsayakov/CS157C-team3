@@ -6,6 +6,8 @@ import edu.sjsu.recipefinder.model.PostRecipe;
 import edu.sjsu.recipefinder.model.SearchRecipe;
 import redis.clients.jedis.Jedis;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class RecipeService {
@@ -74,6 +76,8 @@ public class RecipeService {
             jedis.set("recipe_ingredients_quantity_"+recipeNumberToBeUpdated, recipe.getIngredients().trim());
 
             String[] ingredients = loader.getExtractedIngredients(recipe.getIngredients().toLowerCase().trim());
+            jedis.del("recipe_ingredients_" + recipeNumberToBeUpdated);
+
 
             for(String ingredient : ingredients) {
                 if (!ingredient.isBlank()) {
@@ -111,17 +115,29 @@ public class RecipeService {
     public List<PostRecipe> searchRecipe(Jedis jedis, SearchRecipe recipe){
         List<PostRecipe> listOfRecipes = new ArrayList<>();
         int count = Integer.parseInt(jedis.get("recipe_count"));
+        Set<String> users = jedis.keys("recipe_user_*");
+
+
+        Map<String,String> map = new HashMap<>();
+
+        for(String user : users){
+            List<String> myRecipes = jedis.lrange(user,0,-1);
+            for(String i : myRecipes){
+                map.put(i,user.split("_")[2]);
+            }
+        }
 
         if(recipe.getEmail() != null && !recipe.getEmail().trim().isEmpty()){
             List<String> myRecipes = jedis.lrange("recipe_user_"+recipe.getEmail(),0,-1);
             for(String i : myRecipes){
+                String email = jedis.hget("user_"+recipe.getEmail(),"name");
                 String name = jedis.get("recipe_name_"+i);
                 String steps = jedis.get("recipe_steps_"+i);
                 String ingredients = jedis.get("recipe_ingredients_quantity_"+i);
                 String photo = jedis.get("recipe_photo_"+i);
                 String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                 String foodType = jedis.get("recipe_foodtype_"+i);
-                PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name,ingredients,steps,photo,estimatedTime,foodType,i);
+                PostRecipe resultRecipe = new PostRecipe(email,name,ingredients,steps,photo,estimatedTime,foodType,i);
                 listOfRecipes.add(resultRecipe);
             }
             return listOfRecipes;
@@ -132,18 +148,20 @@ public class RecipeService {
             String name = recipe.getName().toLowerCase().trim();
 
 
+
             if(name.split(" ").length == 1){
                 for(int i = 1; i <= count; i++){
-                    String dbRecipeName = jedis.get("recipe_name_"+i);
+                    String dbRecipeName = jedis.get("recipe_name_"+i).toLowerCase();
                     List<String> recipeNameWords = new ArrayList(Arrays.asList(dbRecipeName.split(" ")));
                     if(recipeNameWords.contains(name)){
                         String name1 = jedis.get("recipe_name_"+i);
+                        String email = jedis.hget("user_"+map.get(String.valueOf(i)),"name");
                         String steps = jedis.get("recipe_steps_"+i);
                         String ingredients = jedis.get("recipe_ingredients_quantity_"+i);
                         String photo = jedis.get("recipe_photo_"+i);
                         String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                         String foodType = jedis.get("recipe_foodtype_"+i);
-                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
+                        PostRecipe resultRecipe = new PostRecipe(email,name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
                         listOfRecipes.add(resultRecipe);
                     }
                 }
@@ -152,12 +170,13 @@ public class RecipeService {
                     String dbRecipeName = jedis.get("recipe_name_"+i).toLowerCase().trim();
                     if(dbRecipeName.equals(name)){
                         String name1 = jedis.get("recipe_name_"+i);
+                        String email = jedis.hget("user_"+map.get(String.valueOf(i)),"name");
                         String steps = jedis.get("recipe_steps_"+i);
                         String ingredients = jedis.get("recipe_ingredients_quantity_"+i);
                         String photo = jedis.get("recipe_photo_"+i);
                         String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                         String foodType = jedis.get("recipe_foodtype_"+i);
-                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
+                        PostRecipe resultRecipe = new PostRecipe(email,name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
                         listOfRecipes.add(resultRecipe);
                     }
                 }
@@ -165,7 +184,7 @@ public class RecipeService {
         }
 
         if(recipe.getEstimatedTime() != null && !recipe.getEstimatedTime().trim().isEmpty()){
-            int desiredTime = Integer.parseInt(recipe.getEstimatedTime());
+            int desiredTime = Integer.parseInt(recipe.getEstimatedTime().trim());
             if(listOfRecipes.size() > 0){
                 List<PostRecipe> removeList = new ArrayList<>();
                 for(PostRecipe shortlistedRecipe : listOfRecipes){
@@ -178,14 +197,15 @@ public class RecipeService {
             } else{
                 for(int i = 1; i <= count; i++){
                     int dbRecipeTime = Integer.parseInt(jedis.get("recipe_estimatedtime_"+i).trim());
-                    if(desiredTime <= dbRecipeTime){
+                    if(desiredTime >= dbRecipeTime){
                         String name1 = jedis.get("recipe_name_"+i);
+                        String email = jedis.hget("user_"+map.get(String.valueOf(i)),"name");
                         String steps = jedis.get("recipe_steps_"+i);
                         String ingredients = jedis.get("recipe_ingredients_quantity_"+i);
                         String photo = jedis.get("recipe_photo_"+i);
                         String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                         String foodType = jedis.get("recipe_foodtype_"+i);
-                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
+                        PostRecipe resultRecipe = new PostRecipe(email,name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
                         listOfRecipes.add(resultRecipe);
                     }
                 }
@@ -209,12 +229,13 @@ public class RecipeService {
                     String dbFoodType = jedis.get("recipe_foodtype_"+i).toLowerCase().trim();
                     if(desiredFoodType.equals(dbFoodType)){
                         String name1 = jedis.get("recipe_name_"+i);
+                        String email = jedis.hget("user_"+map.get(String.valueOf(i)),"name");
                         String steps = jedis.get("recipe_steps_"+i);
                         String ingredients = jedis.get("recipe_ingredients_quantity_"+i);
                         String photo = jedis.get("recipe_photo_"+i);
                         String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                         String foodType = jedis.get("recipe_foodtype_"+i);
-                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
+                        PostRecipe resultRecipe = new PostRecipe(email,name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
                         listOfRecipes.add(resultRecipe);
                     }
                 }
@@ -222,7 +243,7 @@ public class RecipeService {
         }
 
         if(recipe.getIngredients() != null && !recipe.getIngredients().trim().isEmpty()){
-            String[] ingredientsList = recipe.getIngredients().trim().split(" ");
+            String[] ingredientsList = recipe.getIngredients().trim().split(",");
 
             int leftLimit = 48; // numeral '0'
             int rightLimit = 122; // letter 'z'
@@ -261,17 +282,35 @@ public class RecipeService {
                     float percentOfMatchingIngredients = ((float) countOfMatchingIngredients / countOfAvailableIngredients ) * 100;
                     if(percentOfMatchingIngredients >= (float) 50){
                         String name1 = jedis.get("recipe_name_"+i);
+                        String email = jedis.hget("user_"+map.get(String.valueOf(i)),"name");
                         String steps = jedis.get("recipe_steps_"+i);
                         String ingredients = jedis.get("recipe_ingredients_quantity_"+i);
                         String photo = jedis.get("recipe_photo_"+i);
                         String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
                         String foodType = jedis.get("recipe_foodtype_"+i);
-                        PostRecipe resultRecipe = new PostRecipe(recipe.getEmail(),name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
+                        PostRecipe resultRecipe = new PostRecipe(email,name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
                         listOfRecipes.add(resultRecipe);
                     }
                 }
             }
+           jedis.del(generatedString);
+        }
+
+        if(recipe.getEmail() == null && recipe.getIngredients() == null && recipe.getFoodType() == null &&
+        recipe.getEstimatedTime() == null && recipe.getName() == null){
+            for(int i = 1; i <= count; i++){
+                String name1 = jedis.get("recipe_name_"+i);
+                String email = jedis.hget("user_"+map.get(String.valueOf(i)),"name");
+                String steps = jedis.get("recipe_steps_"+i);
+                String ingredients = jedis.get("recipe_ingredients_quantity_"+i);
+                String photo = jedis.get("recipe_photo_"+i);
+                String estimatedTime = jedis.get("recipe_estimatedtime_"+i);
+                String foodType = jedis.get("recipe_foodtype_"+i);
+                PostRecipe resultRecipe = new PostRecipe(email,name1,ingredients,steps,photo,estimatedTime,foodType,String.valueOf(i));
+                listOfRecipes.add(resultRecipe);
+            }
         }
         return listOfRecipes;
     }
+
 }
