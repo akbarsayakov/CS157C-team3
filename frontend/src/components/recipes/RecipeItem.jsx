@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import Recipe from '../../pages/Recipe'
 
 function RecipeItem({ recipe }) {
   return (
@@ -19,7 +18,7 @@ function RecipeItem({ recipe }) {
             className='text-base-content text-opacity-40'
             to={`/recipe/${recipe.name}`}
           >
-            You have {recipe.usedIngredientCount} ingredients
+            You have ingredients
           </Link>
         </div>
       </div>
